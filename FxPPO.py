@@ -22,13 +22,14 @@ PAIRS = ['EUR_USD', 'USD_JPY', 'GBP_USD', 'AUD_USD', 'USD_CHF', 'USD_CAD',
 MODE = 'Local'
 FREQ = 'M5'
 DATA_FOLDER_NAME = 'histdata_v3'
+TEST_FOLDER_NAME = 'testdata_v3'
 MARKET_STATE_HISTORY = 4
 DEPOSIT = 1000
 LEV = 1
 LOT_SIZE = 1
 
 LOSS_CLIPPING = 0.2
-EPISODES = 1000
+EPISODES = 10000
 EPOCHS = 10
 GAMMA = 0.99
 BATCH_SIZE = 256
@@ -222,6 +223,10 @@ class Agent:
 
     #___________________________________________________________________________
     def train(self):
+        self.episode = 0
+        if MODE == 'Local':
+            self.env.acct.mrkt.data_folder_name = DATA_FOLDER_NAME
+        self.reset_env()
         while self.episode < EPISODES:
             print('*******************************')
             print('Episode {}'.format(self.episode))
@@ -234,3 +239,38 @@ class Agent:
                                           [action])
             for _ in range(EPOCHS):
                 self.critic.train_on_batch([obs], [reward])
+                
+    #___________________________________________________________________________
+    def test(self, nGames=1):
+        # Run the actor on environment and see results
+        # Desired outputs for analysis:
+            # Market data for that game
+            # Trades made
+            # Account Valuation over Time
+            # Final Open Positions
+            # Rewards
+
+        output = [[], [], [], [], []]
+        if MODE == 'Local':
+            # Switch to 2018 dataset
+            self.env.acct.mrkt.data_folder_name = TEST_FOLDER_NAME
+
+        for g in range(nGames):
+            self.reset_env()
+            done = False
+            while not done:
+                action_matrix, predicted_action = self.get_action()
+                observation, reward, done, info = self.env.act(action_matrix)
+                self.reward.append(reward)
+
+            mkt_data = self.acct.mrkt.pair
+            trades = self.acct.trades
+            positions = self.acct.positions
+
+            output[0].append(mkt_data)
+            output[1].append(trades)
+            output[2].append(self.acct.valuation)
+            output[3].append(positions)
+            output[2].append(self.reward)
+
+        return output
