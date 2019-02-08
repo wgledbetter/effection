@@ -19,19 +19,19 @@ class FxEnv:
         self.freq = freq
         self.market_state_hist = market_state_hist
         self.lot_size = lot_size
-        
+
         self.i = 0
-        
+
         if mode == 'Local':
             self.initLocal(deposit=deposit, lev=lev,
                            data_folder_name=data_folder_name)
-            
+
         elif mode == 'Practice':
             self.initPractice()
-        
+
         elif mode == 'Live':
             self.initLive()
-            
+
 
 #===============================================================================
     # Initialization
@@ -39,8 +39,8 @@ class FxEnv:
         self.acct = FxAcct(mode=self.mode, pairs=self.pairs, freq=self.freq,
                            deposit=deposit, lev=lev)
         self.mktHist = []
-        
-        
+
+
 #===============================================================================
     # Primary Interface
     def state(self):
@@ -62,51 +62,51 @@ class FxEnv:
             histMktState = np.append(histMktState, hms)
         st = np.append(time, np.append(acctState, np.append(mrktState, histMktState)))
         return st
-        
+
 #-------------------------------------------------------------------------------
     def reward(self):
         val_im1 = self.acct.valuation[-1]
         val_i = self.acct.value()
         return (val_i - val_im1)/val_im1
-        
+
 #-------------------------------------------------------------------------------
     def act(self, action):
         # Parse and Execute the buy/sell/hold actions
-        # action is a 3*nPairs vector. 
+        # action is a 3*nPairs vector.
         for i, pair in enumerate(self.pairs):
             cmd = np.argmax(action[3*i:3*(i+1)])
             if cmd == 0:
                 # Buy
                 self.acct.buy(pair, self.lot_size)
-                
+
             elif cmd == 1:
-                # Hold
-                43-3
-                
+                # Close
+                self.acct.close(pair)
+
             elif cmd == 2:
                 # Sell
                 self.acct.sell(pair, self.lot_size)
-                
-                
+
+
         self.step()
         # Need to return: observation(state), reward, done, info
         done = (self.i == self.acct.mrkt.session_length-1)
         return self.state(), self.reward(), done, {}
-        
+
 #-------------------------------------------------------------------------------
     def step(self):
         if self.mode == 'Local':
             self.mktHist.append(self.acct.mrkt.getVecState())
         self.acct.step()
         self.i += 1
-        
+
 #-------------------------------------------------------------------------------
     def reset(self):
         self.acct.reset()
         self.i = 0
         return self.state()
-        
-        
+
+
 #===============================================================================
     # Get info about the environment
     def stateSize(self):
@@ -117,7 +117,7 @@ class FxEnv:
         # Market Hist = (nMktHis-1)t*(5 per pair)
         size = 3 + (2*self.nPairs) + (self.market_state_hist)*(5*self.nPairs)
         return size
-        
+
 #-------------------------------------------------------------------------------
     def actionSize(self):
         # 3 per pair
