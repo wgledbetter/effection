@@ -64,7 +64,8 @@ class FxAcct:
                 return
             
             if not exist:
-                self.positions[pair] = {'Size': size, 'Price': self.mrkt.getPrice(pair)}
+                self.positions[pair] = {'Size': size, 'Price': self.mrkt.getPrice(pair),
+                                        'Time': self.i}
                 self.cash -= size * self.positions[pair]['Price'] / self.lev
                 if self.cash < 0:
                     print('OUT OF CASH')
@@ -94,7 +95,8 @@ class FxAcct:
                 return
             
             if not exist:
-                self.positions[pair] = {'Size': -size, 'Price': self.mrkt.getPrice(pair)}
+                self.positions[pair] = {'Size': -size, 'Price': self.mrkt.getPrice(pair),
+                                        'Time': self.i}
                 self.cash -= size * self.positions[pair]['Price'] / self.lev
                 return
         
@@ -120,6 +122,8 @@ class FxAcct:
                 t['Close'] = self.mrkt.getPrice(pair)  # This marks the actual termination
                 t['PL'] = s * (t['Close'] - t['Open'])
                 t['Pct'] = (s/abs(s)) * (self.lev/t['Open']) * (t['Close'] - t['Open']) * 100
+                t['Start'] = self.positions[pair]['Time']
+                t['Stop'] = self.i
                 
                 del self.positions[pair]
                 self.cash += abs(s)*t['Open']/self.lev + t['PL']
