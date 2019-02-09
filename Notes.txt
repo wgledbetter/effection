@@ -123,3 +123,5 @@ Today I need to devote more time to actual school-related work, but tonight I ma
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 9 FEB
 1211: Getting git/github integration set up on WS01. The 10k training is almost done, too.
+
+Goals for today: Fewer pairs, longer history, begin working on LSTM, begin modifying reward function
