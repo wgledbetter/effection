@@ -239,7 +239,7 @@ class Agent:
                                           [action])
             for _ in range(EPOCHS):
                 self.critic.train_on_batch([obs], [reward])
-
+                
     #___________________________________________________________________________
     def test(self, nGames=1):
         # Run the actor on environment and see results
