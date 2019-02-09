@@ -27,12 +27,11 @@ PAIRS.append('GBP_USD')
 #PAIRS.append('EUR_JPY')
 PAIRS.append('EUR_GBP')
 
-
 MODE = 'Local'
 FREQ = 'M5'
 DATA_FOLDER_NAME = 'histdata_v3'
 TEST_FOLDER_NAME = 'testdata_v3'
-MARKET_STATE_HISTORY = 4
+MARKET_STATE_HISTORY = 6
 DEPOSIT = 1000
 LEV = 1
 LOT_SIZE = 1
@@ -196,10 +195,10 @@ class Agent:
             self.reward[j] = reward
 
     #___________________________________________________________________________
-    def get_batch(self):
+    def get_batch(self, batch_size=BATCH_SIZE):
         batch = [[], [], [], []]
         tmp_batch = [[], [], []]
-        while len(batch[0]) < BATCH_SIZE:
+        while len(batch[0]) < batch_size:
             action_matrix, predicted_action = self.get_action()
             observation, reward, done, info = self.env.act(action_matrix)
             self.reward.append(reward)
@@ -231,15 +230,15 @@ class Agent:
         return obs, action_mat, pred, reward
 
     #___________________________________________________________________________
-    def train(self):
+    def train(self, episodes=EPISODES, batch_size=BATCH_SIZE):
         self.episode = 0
         if MODE == 'Local':
             self.env.acct.mrkt.data_folder_name = DATA_FOLDER_NAME
         self.reset_env()
-        while self.episode < EPISODES:
+        while self.episode < episodes:
             print('*******************************')
             print('Episode {}'.format(self.episode))
-            obs, action, pred, reward = self.get_batch()
+            obs, action, pred, reward = self.get_batch(batch_size=batch_size)
             old_pred = pred
             pred_values = self.critic.predict(obs)
 
