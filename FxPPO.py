@@ -5,7 +5,7 @@
 import numpy as np
 
 from keras import backend as K
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Input, Dense
 from keras.optimizers import Adam
 
@@ -19,19 +19,19 @@ from FxEnv import FxEnv
 # Define
 PAIRS = []
 PAIRS.append('EUR_USD')
-#PAIRS.append('USD_JPY')
+PAIRS.append('USD_JPY')
 PAIRS.append('GBP_USD')
-#PAIRS.append('AUD_USD')
-#PAIRS.append('USD_CHF')
-#PAIRS.append('USD_CAD')
-#PAIRS.append('EUR_JPY')
+PAIRS.append('AUD_USD')
+PAIRS.append('USD_CHF')
+PAIRS.append('USD_CAD')
+PAIRS.append('EUR_JPY')
 PAIRS.append('EUR_GBP')
 
 MODE = 'Local'
 FREQ = 'M5'
 DATA_FOLDER_NAME = 'histdata_v3'
 TEST_FOLDER_NAME = 'testdata_v3'
-MARKET_STATE_HISTORY = 6
+MARKET_STATE_HISTORY = 4
 DEPOSIT = 1000
 LEV = 1
 LOT_SIZE = 1
@@ -282,3 +282,15 @@ class Agent:
             output[2].append(self.reward)
 
         return output
+
+    #___________________________________________________________________________
+    def load_actor(self, fname):
+        # Load a previous actor model
+        # Be careful that the environment sizing is the same.
+        self.actor = load_model(fname)
+
+    #___________________________________________________________________________
+    def load_critic(self, fname):
+        # Load a previous critic model
+        # Be careful that the environment sizing is the same.
+        self.critic = load_model(fname)
