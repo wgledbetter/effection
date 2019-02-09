@@ -1,0 +1,125 @@
+19 JAN:
+In oanda, a 'MARKET' order is what we want. Simply a buy or sell (Depending on 'units' positive or negative) at the current market price.
+
+Here is the vector order we will use:
+
+    EUR/USD
+    USD/JPY
+    GBP/USD
+    AUD/USD
+    USD/CHF
+    USD/CAD
+    EUR/JPY
+    EUR/GBP
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+20 JAN:
+For now, I'm going to fill in all gaps, regardless of the length. I won't lose the knowledge of where the gaps are because I can search for trade volume of zero. Additionally, if I fill all gaps like that, then it will be easier to compare across different pairs. If all pairs are quiet for at least 2 hours or so, I can infer that the market was closed.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+24 JAN:
+I think I got all necessary test ('Local') functionality working for the FxMrkt class. Next I'll do the FxAcct class.
+I noticed that there are some games that have a very small number of steps. I need to remove those.
+Also, there are some places where the data is sparse for the first few steps. It would be good to condition that out.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+25 JAN:
+Okay! I just found out how to reset account funding for oanda practice.
+This afternoon I'll probably play around and lose it all so I can figure out how this shit works.
+
+Market is currently closed for the weekend, but I just made a oanda reference file that should help later.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+26 JAN:
+Morning Goals:
+  Local Account setup
+    What does that mean?
+    define a format for storing open positions
+    Info like size, pair, initial price
+    ALSO
+    method for storing realized trades
+    calculating realized and unrealized PL
+    Quantifying value of open trades with leverage
+
+Currently 2030. Good work today. What's next?
+  FxEnv.act(action)
+  Replace all NaNs with zero in the dataset, I think? I'll see what oanda does for empty timespans.
+  While we're back on data conditioning, I think I should cut every 'game' that is shorter than 36 hours.
+  Read the articles on A2C and PPO
+  Test run keras ppo code with aiGym
+  Modify keras PPO code to use my FxEnv
+ 
+ I could build in stop losses. Put that on the list for later.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+27 JAN:
+Have to add a time parameter to the environment state
+
+1640: Mostly data conditioning today. Which is useful and necessary, but I had hoped to almost test full runs. I've still got daylight, of course, so I might be able to.
+Currently re-running some interpolation because I forgot how to linearly interpolate, but that's okay. Will be done before dinner.
+So yeah, dinner now. I think the next step is playing around with the keras ppo examples a bit, but I really don't need to dig into that too much. I just need to know what the inputs and outputs to the gym environment look like, and mimic those with my FxEnv. Getting close.
+
+1947: I'm going to have to discretize the action space. Meaning:
+  0: buy XXX_YYY
+  1: none XXX_YYY
+  2: sell XXX_YYY
+  3: buy XXX_ZZZ
+  4: hold XXX_ZZZ
+  ...
+  i: buy XXX_YYY and XXX_ZZZ
+  j: buy XXX_YYY and sell XXX_ZZZ
+  ...
+
+Create a terminal condition when cash runs out
+Stop losses will punish bad decisions if necessary
+
+Uhhhh... that action space discretization with 3 options for each of 8 pairs gives a vector size of 6561...
+If we only consider 4 pairs, it's 81...
+Three is 27. Maybe start with 3?
+
+What we could potentially do is train a net on one pair like in the "Financial Trading as a game" paper. They feed in the whole market state, but only allow action on one pair, giving an action space of 3. That might make more sense, but let's see what happens with my current formulation. I think the promise in mine comes from the PPO.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+4 FEB
+I don't HAVE to follow the standard action-discretization practice. I just need to understand how the argmax or whatever affects the loss function, if at all. I could probably define a similar function that just does the argmax of groups of three.
+We'll see. I might get back on this next weekend.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+6 FEB
+If I re-define the activation function on the output layer, I can have it output an action probability for each pair.
+Then, using those probabilities, I can choose an action for each pair.
+Then I put those actions into a long vector like [0 1 0 1 0 0 0 0 1 1 0 0].
+
+What needs to change from ppo_example2.py?
+  Must operate on FxEnv
+  actor activation function (depends on FxEnv)
+  actor and critic structure
+  get_action(self) must use multiple actions
+
+1600:
+  Good work, if short.
+  Need to put code in new effection repository.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+7 FEB
+1426: If I use dropout, that might make the system more robust.
+I've been working on this all day and I'm pretty close to doing a training session. Good shit.
+
+2050:
+I actually am able to start a training run, but it was throwing some error after a bit that I don't remember right now. There are definitely still modifications to make, though. I think that a really tailored reward function will be crucial. Also, might need to put some sort of limit on cash draw.
+
+2132:
+Training issue was just on WS01! Currently training on my home PC!
+
+2239:
+Need to get 2018 data and condition it and write a test() function to evaluate historical training with year 2018 performance
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+8 FEB
+0942:
+Training on home PC last night failed. Probably a RAM issue. Anyway, this morning I updated cuda and the nvidia drivers on WS01 and training is functional here now.
+Today I need to devote more time to actual school-related work, but tonight I may go sit in Gorgas and work via TeamViewer. I'll condition the 2018 data and write the test() function.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+9 FEB
+1211: Getting git/github integration set up on WS01. The 10k training is almost done, too.
