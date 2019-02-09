@@ -5,7 +5,7 @@
 import numpy as np
 
 from keras import backend as K
-from keras.models import Model, load_model
+from keras.models import Model
 from keras.layers import Input, Dense
 from keras.optimizers import Adam
 
@@ -17,21 +17,13 @@ from FxEnv import FxEnv
 #===============================================================================
 ## Global Variables
 # Define
-PAIRS = []
-PAIRS.append('EUR_USD')
-#PAIRS.append('USD_JPY')
-PAIRS.append('GBP_USD')
-#PAIRS.append('AUD_USD')
-#PAIRS.append('USD_CHF')
-#PAIRS.append('USD_CAD')
-#PAIRS.append('EUR_JPY')
-PAIRS.append('EUR_GBP')
-
+PAIRS = ['EUR_USD', 'USD_JPY', 'GBP_USD', 'AUD_USD', 'USD_CHF', 'USD_CAD',
+         'EUR_JPY', 'EUR_GBP']
 MODE = 'Local'
 FREQ = 'M5'
 DATA_FOLDER_NAME = 'histdata_v3'
 TEST_FOLDER_NAME = 'testdata_v3'
-MARKET_STATE_HISTORY = 6
+MARKET_STATE_HISTORY = 4
 DEPOSIT = 1000
 LEV = 1
 LOT_SIZE = 1
@@ -44,7 +36,7 @@ BATCH_SIZE = 256
 LR = 1e-4
 
 FX_ACTIVATION = K.softmax
-ACTOR_ACTIV = 'relu'
+ACTOR_ACTIV = 'tanh'
 
 NUM_LAYERS = 2
 #WHERE_LSTM = 0
@@ -195,10 +187,10 @@ class Agent:
             self.reward[j] = reward
 
     #___________________________________________________________________________
-    def get_batch(self, batch_size=BATCH_SIZE):
+    def get_batch(self):
         batch = [[], [], [], []]
         tmp_batch = [[], [], []]
-        while len(batch[0]) < batch_size:
+        while len(batch[0]) < BATCH_SIZE:
             action_matrix, predicted_action = self.get_action()
             observation, reward, done, info = self.env.act(action_matrix)
             self.reward.append(reward)
@@ -230,15 +222,15 @@ class Agent:
         return obs, action_mat, pred, reward
 
     #___________________________________________________________________________
-    def train(self, episodes=EPISODES, batch_size=BATCH_SIZE):
+    def train(self):
         self.episode = 0
         if MODE == 'Local':
             self.env.acct.mrkt.data_folder_name = DATA_FOLDER_NAME
         self.reset_env()
-        while self.episode < episodes:
+        while self.episode < EPISODES:
             print('*******************************')
             print('Episode {}'.format(self.episode))
-            obs, action, pred, reward = self.get_batch(batch_size=batch_size)
+            obs, action, pred, reward = self.get_batch()
             old_pred = pred
             pred_values = self.critic.predict(obs)
 
@@ -247,7 +239,11 @@ class Agent:
                                           [action])
             for _ in range(EPOCHS):
                 self.critic.train_on_batch([obs], [reward])
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> 8e96e2bd864b5a9cdf434738b4d5ed644f41666e
     #___________________________________________________________________________
     def test(self, nGames=1):
         # Run the actor on environment and see results
@@ -258,13 +254,12 @@ class Agent:
             # Final Open Positions
             # Rewards
 
-        output = []
+        output = [[], [], [], [], []]
         if MODE == 'Local':
             # Switch to 2018 dataset
             self.env.acct.mrkt.data_folder_name = TEST_FOLDER_NAME
 
         for g in range(nGames):
-            temp_output = [[], [], [], [], []]
             self.reset_env()
             done = False
             while not done:
@@ -272,30 +267,14 @@ class Agent:
                 observation, reward, done, info = self.env.act(action_matrix)
                 self.reward.append(reward)
 
-            mkt_data = self.env.acct.mrkt.pair
-            trades = self.env.acct.trades
-            positions = self.env.acct.positions
+            mkt_data = self.acct.mrkt.pair
+            trades = self.acct.trades
+            positions = self.acct.positions
 
-            temp_output[0].append(mkt_data)
-            temp_output[1].append(trades)
-            temp_output[2].append(self.env.acct.valuation)
-            temp_output[3].append(positions)
-            temp_output[4].append(self.reward)
-
-            output.append(temp_output)
+            output[0].append(mkt_data)
+            output[1].append(trades)
+            output[2].append(self.acct.valuation)
+            output[3].append(positions)
+            output[2].append(self.reward)
 
         return output
-
-    #___________________________________________________________________________
-    def load_actor(self, fname):
-        # Load a previous actor model
-        # Be careful that the environment sizing is the same.
-        # ACTUALLY: Doesn't seem to work because of custom loss function
-        self.actor = load_model(fname)
-
-    #___________________________________________________________________________
-    def load_critic(self, fname):
-        # Load a previous critic model
-        # Be careful that the environment sizing is the same.
-        # ACTUALLY: Doesn't seem to work because of custom loss function
-        self.critic = load_model(fname)

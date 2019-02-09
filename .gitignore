@@ -1,0 +1,25 @@
+# Don't track data
+histdata*
+testdata*
+*.pkl
+data*
+
+# Don't track saved models
+*.h5
+
+# Personal Info
+*token*
+*acctID*
+
+# Other People's stuff
+reference*
+raw*
+
+# Compiled python
+__pycache__
+
+# Sketches
+sketching
+
+# Probably Plotly plots
+*.html
