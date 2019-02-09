@@ -9,20 +9,20 @@ class FxMrkt:
                                             'AUD_USD', 'USD_CHF', 'USD_CAD',
                                             'EUR_JPY', 'EUR_GBP'],
                        freq='M5', data_folder_name='histdata_v3'):
-        
+
         self.mode = mode
         self.pairs = pairs  # Names of pairs to use
         self.freq = freq
         self.i = 0  # Number of steps in this session
-        
+
         if mode == 'Local':
             self.initLocal(data_folder_name=data_folder_name)
         elif mode == 'Practice':
             self.initPractice()
         elif mode == 'Live':
             self.initLive()
-            
-            
+
+
 #===============================================================================
     # Initialization
     def initLocal(self, data_folder_name):
@@ -33,7 +33,7 @@ class FxMrkt:
         self.data_folder_name = data_folder_name
         self.loadGame()
         self.session_length = len( self.pair[self.pairs[0]]['gmt'] )
-    
+
 #-------------------------------------------------------------------------------
     def initPractice(self):
         # Uses oanda practice account
@@ -43,22 +43,22 @@ class FxMrkt:
     def initLive(self):
         # Uses oanda live account
         1+2
-        
+
 #===============================================================================
     # External Interface Functions
     def nextSession(self):
         self.i = 0
         if self.mode == 'Local':
             self.loadGame()
-            
+
         elif self.mode == 'Practice':
             # Wait a weekend?
             1+2
-            
+
         elif self.mode == 'Live':
             # Wait a weekend?
             1+2
-            
+
 #-------------------------------------------------------------------------------
     def getDicState(self):
         # Return the current state as a dictionary.
@@ -67,15 +67,15 @@ class FxMrkt:
         if self.mode == 'Local':
             for p in self.pair:
                 ret[p] = self.pair[p].iloc[self.i].to_dict()
-                
+
         elif self.mode == 'Practice':
             1+1
-            
+
         elif self.mode == 'Live':
             1+1
-            
+
         return ret
-    
+
 #-------------------------------------------------------------------------------
     def getVecState(self):
         # Return the current state as a np array.
@@ -85,15 +85,15 @@ class FxMrkt:
             for p in self.pairs:
                 a = self.pair[p].iloc[self.i].values
                 ret = np.append(ret, a[1:])  # Cut the timestamp
-                
+
         elif self.mode == 'Practice':
             1+1
-            
+
         elif self.mode == 'Live':
             1+3
-            
+
         return ret
-    
+
 #-------------------------------------------------------------------------------
     def step(self):
         self.i += 1
@@ -101,10 +101,10 @@ class FxMrkt:
             1+1
             if self.i >= self.session_length:
                 print('END OF GAME')
-            
+
         elif self.mode == 'Practice':
             1+1
-            
+
         elif self.mode == 'Live':
             1+1
 
@@ -122,7 +122,7 @@ class FxMrkt:
                 # Probably means its a shorter filename
                 1+2
         self.session_length = len( self.pair[self.pairs[0]]['gmt'] )
-        
+
 #-------------------------------------------------------------------------------
     def getPrice(self, p):
         if self.mode == 'Local':
@@ -135,9 +135,9 @@ class FxMrkt:
             except:
                 print('END OF GAME')
                 return 0
-            
+
         elif self.mode == 'Practice':
             1+1
-            
+
         elif self.mode == 'Live':
             1+2
