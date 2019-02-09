@@ -276,11 +276,11 @@ class Agent:
             trades = self.env.acct.trades
             positions = self.env.acct.positions
 
-            temp_output[0].append(mkt_data)
-            temp_output[1].append(trades)
-            temp_output[2].append(self.env.acct.valuation)
-            temp_output[3].append(positions)
-            temp_output[4].append(self.reward)
+            temp_output[0] = mkt_data
+            temp_output[1] = trades
+            temp_output[2] = self.env.acct.valuation
+            temp_output[3] = positions
+            temp_output[4] = self.reward
 
             output.append(temp_output)
 

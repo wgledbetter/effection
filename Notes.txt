@@ -127,3 +127,7 @@ Today I need to devote more time to actual school-related work, but tonight I ma
 Goals for today: Fewer pairs, longer history, begin working on LSTM, begin modifying reward function
 
 It's strange that the agent consistently loses 24 pct.
+
+Some kind of data normalization might be useful so that it's not directly recieving the price of a pair, but the change of that pair.
+
+Interesting artifact with reward function: It's 4 OoM higher on the last step... Well, that's why I'm updating it.
