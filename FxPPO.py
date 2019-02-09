@@ -17,8 +17,17 @@ from FxEnv import FxEnv
 #===============================================================================
 ## Global Variables
 # Define
-PAIRS = ['EUR_USD', 'USD_JPY', 'GBP_USD', 'AUD_USD', 'USD_CHF', 'USD_CAD',
-         'EUR_JPY', 'EUR_GBP']
+PAIRS = []
+PAIRS.append('EUR_USD')
+#PAIRS.append('USD_JPY')
+PAIRS.append('GBP_USD')
+#PAIRS.append('AUD_USD')
+#PAIRS.append('USD_CHF')
+#PAIRS.append('USD_CAD')
+#PAIRS.append('EUR_JPY')
+PAIRS.append('EUR_GBP')
+
+
 MODE = 'Local'
 FREQ = 'M5'
 DATA_FOLDER_NAME = 'histdata_v3'
