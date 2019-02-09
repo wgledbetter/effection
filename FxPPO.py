@@ -5,7 +5,7 @@
 import numpy as np
 
 from keras import backend as K
-from keras.models import Model, load_model
+from keras.models import Model, load_model, LSTM
 from keras.layers import Input, Dense
 from keras.optimizers import Adam
 
