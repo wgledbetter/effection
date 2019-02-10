@@ -23,3 +23,6 @@ sketching
 
 # Probably Plotly plots
 *.html
+
+# Git shit
+*.orig
