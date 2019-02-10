@@ -3,6 +3,9 @@
 #===============================================================================
 ## Imports
 import numpy as np
+import pandas as pd
+import plotly.offline as py
+import plotly.graph_objs as go
 
 from keras import backend as K
 from keras.models import Model, load_model
@@ -271,6 +274,7 @@ class Agent:
                 action_matrix, predicted_action = self.get_action()
                 observation, reward, done, info = self.env.act(action_matrix)
                 self.reward.append(reward)
+                self.observation = observation
 
             mkt_data = self.env.acct.mrkt.pair
             trades = self.env.acct.trades
@@ -299,3 +303,27 @@ class Agent:
         # Be careful that the environment sizing is the same.
         # ACTUALLY: Doesn't seem to work because of custom loss function
         self.critic = load_model(fname)
+
+    #___________________________________________________________________________
+    def test_start(self, test_folder_name=TEST_FOLDER_NAME):
+        # Begins new game
+        if MODE == 'Local':
+            self.env.acct.mrkt.data_folder_name = test_folder_name
+
+        self.reset_env()
+        self.test_done = False
+
+    #___________________________________________________________________________
+    def test_step(self, nSteps=1):
+        if not self.test_done:
+            for s in range(nSteps):
+                actmat, predact = self.get_action()
+                obs, rew, done, info = self.env.act(actmat)
+                self.reward.append(rew)
+                self.observation = obs
+
+        return actmat, predact
+
+    #___________________________________________________________________________
+    def plot_test(self, testOut):
+        2-1
