@@ -3,6 +3,11 @@
 #===============================================================================
 ## Imports
 import numpy as np
+import pandas as pd
+import plotly.offline as py
+import plotly.graph_objs as go
+# from plotly import tools as py_tools # For subplotting
+import datetime
 
 from keras import backend as K
 from keras.models import Model, load_model
@@ -249,7 +254,7 @@ class Agent:
                 self.critic.train_on_batch([obs], [reward])
 
     #___________________________________________________________________________
-    def test(self, nGames=1):
+    def test(self, nGames=1, test_folder_name=TEST_FOLDER_NAME):
         # Run the actor on environment and see results
         # Desired outputs for analysis:
             # Market data for that game
@@ -261,7 +266,7 @@ class Agent:
         output = []
         if MODE == 'Local':
             # Switch to 2018 dataset
-            self.env.acct.mrkt.data_folder_name = TEST_FOLDER_NAME
+            self.env.acct.mrkt.data_folder_name = test_folder_name
 
         for g in range(nGames):
             temp_output = {}
@@ -271,6 +276,7 @@ class Agent:
                 action_matrix, predicted_action = self.get_action()
                 observation, reward, done, info = self.env.act(action_matrix)
                 self.reward.append(reward)
+                self.observation = observation
 
             mkt_data = self.env.acct.mrkt.pair
             trades = self.env.acct.trades
@@ -299,3 +305,84 @@ class Agent:
         # Be careful that the environment sizing is the same.
         # ACTUALLY: Doesn't seem to work because of custom loss function
         self.critic = load_model(fname)
+
+    #___________________________________________________________________________
+    def test_start(self, test_folder_name=TEST_FOLDER_NAME):
+        # Begins new game
+        if MODE == 'Local':
+            self.env.acct.mrkt.data_folder_name = test_folder_name
+
+        self.reset_env()
+        self.test_done = False
+
+    #___________________________________________________________________________
+    def test_step(self, nSteps=1):
+        if not self.test_done:
+            for s in range(nSteps):
+                actmat, predact = self.get_action()
+                obs, rew, done, info = self.env.act(actmat)
+                self.reward.append(rew)
+                self.observation = obs
+
+        return actmat, predact
+
+    #___________________________________________________________________________
+    def plot_test(self, testOut):
+        # Notes:
+            # Trade entry and exit overlay on candle data
+
+        time = datetime.datetime.now()
+        nGames = len(testOut)
+        testDF = pd.DataFrame(testOut)
+
+        for g in range(nGames):
+            plotData = []
+            gameData = testDF.iloc[g]
+            for p in PAIRS:
+                pairData = gameData['data'][p]
+                dates = pairData['gmt']
+                candleTrace = go.Candlestick(x=dates,
+                                             open=pairData['open'],
+                                             high=pairData['high'],
+                                             low=pairData['low'],
+                                             close=pairData['close'])
+
+                pairTrades = []
+                for t in gameData['trades']:
+                    if t['Pair'] == p:
+                        pairTrades.append(t)
+
+                # Now plot the trades on top of the candles
+                xt = []
+                yt = []
+                tColor = []
+                for t in pairTrades:
+                    tStart = dates.iloc[t['Start']+1]
+                    tStop = dates.iloc[t['Stop']+1]
+                    xt += [tStart, tStop, None]
+                    pStart = t['Open']
+                    pStop = t['Close']
+                    yt += [pStart, pStop, None]
+                    if t['Size']*(pStop-pStart) > 0:
+                        # Profitable Trade
+                        col = '#00FF00'
+                        tColor += [col, col, col]
+                    else:
+                        # Unprofitable Trade
+                        col = '#FF0000'
+                        tColor += [col, col, col]
+
+                if pairTrades == []:
+                    tradeTrace = []
+                else:
+                    tradeTrace = go.Scatter(x=xt, y=yt, mode='lines+markers')
+                                            # line=dict(color=tColor))
+
+                # Valuation and reward in subplots? Later...
+
+                plotData = [candleTrace, tradeTrace]
+                fig = go.Figure(data=plotData)
+                py.plot(fig,
+                        filename='./plots/testGame_{}--{}--{}-{}-{}--{}:{}'
+                        .format(g, p, time.year, time.month, time.day,
+                                time.hour, time.minute))

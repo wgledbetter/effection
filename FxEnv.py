@@ -78,7 +78,7 @@ class FxEnv:
             # Weight real value 2x
             u_P_Wr_i = W*real_i + unreal_i
             u_P_Wr_im1 = W*real_im1 + unreal_im1
-            return (u_P_Wr_i - u_P_Wr_im1)/u_P_Wr_im1
+            return 100*(u_P_Wr_i - u_P_Wr_im1)/u_P_Wr_im1
 
 #-------------------------------------------------------------------------------
     def act(self, action):
