@@ -249,7 +249,7 @@ class Agent:
                 self.critic.train_on_batch([obs], [reward])
 
     #___________________________________________________________________________
-    def test(self, nGames=1):
+    def test(self, nGames=1, test_folder_name=TEST_FOLDER_NAME):
         # Run the actor on environment and see results
         # Desired outputs for analysis:
             # Market data for that game
@@ -261,7 +261,7 @@ class Agent:
         output = []
         if MODE == 'Local':
             # Switch to 2018 dataset
-            self.env.acct.mrkt.data_folder_name = TEST_FOLDER_NAME
+            self.env.acct.mrkt.data_folder_name = test_folder_name
 
         for g in range(nGames):
             temp_output = {}
