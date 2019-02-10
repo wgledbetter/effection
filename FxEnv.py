@@ -72,7 +72,7 @@ class FxEnv:
         elif mode == 2:
             W = 2  # Weight of real vs unreal
             real_im1 = self.acct.cashHist[-2]
-            real_i = self.acct.cash()
+            real_i = self.acct.cash
             unreal_im1 = self.acct.unrealHist[-2]
             unreal_i = self.acct.unrealVal()
             # Weight real value 2x
