@@ -64,10 +64,21 @@ class FxEnv:
         return st
 
 #-------------------------------------------------------------------------------
-    def reward(self):
-        val_im1 = self.acct.valuation[-1]
-        val_i = self.acct.value()
-        return (val_i - val_im1)/val_im1
+    def reward(self, mode=2):
+        if mode == 1:
+            val_im1 = self.acct.valuation[-2]
+            val_i = self.acct.value()
+            return 100*(val_i - val_im1)/val_im1
+        elif mode == 2:
+            W = 2  # Weight of real vs unreal
+            real_im1 = self.acct.cashHist[-2]
+            real_i = self.acct.cash()
+            unreal_im1 = self.acct.unrealHist[-2]
+            unreal_i = self.acct.unrealVal()
+            # Weight real value 2x
+            u_P_Wr_i = W*real_i + unreal_i
+            u_P_Wr_im1 = W*real_im1 + unreal_im1
+            return (u_P_Wr_i - u_P_Wr_im1)/u_P_Wr_im1
 
 #-------------------------------------------------------------------------------
     def act(self, action):

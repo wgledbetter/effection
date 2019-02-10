@@ -37,8 +37,9 @@ class FxAcct:
         # Need to setup machinery for managing account
         self.positions = {}
         self.trades = []
-        self.valuation = []
-        self.cashHist = []
+        self.valuation = [self.deposit]
+        self.cashHist = [self.deposit]
+        self.unrealHist = [0]
 
 
 #===============================================================================
@@ -149,7 +150,7 @@ class FxAcct:
             pos = self.positions[pair]
             s = pos['Size']
             p1 = pos['Price']
-            p2 = self.mrkt.getPrice(pair)
+            p2 = self.mrkt.getLastClose(pair)
             v = (abs(s)*p1/l) + s*(p2-p1)
             val += v
 
@@ -167,7 +168,7 @@ class FxAcct:
             pos = self.positions[pair]
             s = pos['Size']
             p1 = pos['Price']
-            p2 = self.mrkt.getPrice(pair)
+            p2 = self.mrkt.getLastClose(pair)
             v = (abs(s)*p1/l) + s*(p2-p1)
             val += v
 
@@ -203,16 +204,19 @@ class FxAcct:
 
 #-------------------------------------------------------------------------------
     def step(self):
-        self.valuation.append(self.value())
         self.cashHist.append(self.cash)
         self.mrkt.step()
+        self.valuation.append(self.value())
+        self.unrealHist.append(self.unrealVal())
         self.i += 1
 
 #-------------------------------------------------------------------------------
     def reset(self):
         self.positions = {}
         self.trades = []
-        self.valuation = []
+        self.valuation = [self.deposit]
         self.cash = self.deposit
+        self.cashHist = [self.deposit]
+        self.unrealHist = [0]
         self.i = 0
         self.mrkt.nextSession()
