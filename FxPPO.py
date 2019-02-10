@@ -346,7 +346,6 @@ class Agent:
                                       high=pairData['high'],
                                       low=pairData['low'],
                                       close=pairData['close'])
-
                 profTrades = []
                 lossTrades = []
                 for t in gameData['trades']:
@@ -372,7 +371,7 @@ class Agent:
                     profTradeTrace = []
                 else:
                     profTradeTrace = go.Scatter(x=xPt, y=yPt, mode='lines+markers',
-                                            line=dict(color=profCol))
+                                                line=dict(color=profCol))
 
                 xLt = []
                 yLt = []
@@ -389,13 +388,15 @@ class Agent:
                     lossTradeTrace = []
                 else:
                     lossTradeTrace = go.Scatter(x=xLt, y=yLt, mode='lines+markers',
-                                            line=dict(color=lossCol))
+                                                line=dict(color=lossCol))
 
                 # Valuation and reward in subplots? Later...
 
                 plotData = [candleTrace, profTradeTrace, lossTradeTrace]
-                fig = go.Figure(data=plotData)
+                layout = go.Layout(xaxis=dict(fixedrange=False),
+                                   yaxis=dict(fixedrange=False))
+                fig = go.Figure(data=plotData, layout=layout)
                 py.plot(fig,
-                        filename='./plots/testGame_{}--{}--{}-{}-{}--{}:{}'
-                        .format(g, p, time.year, time.month, time.day,
-                                time.hour, time.minute))
+                        filename='./plots/{}-{}-{}--{}:{}--testGame_{}--{}'
+                        .format(time.year, time.month, time.day,
+                                time.hour, time.minute, g, p))
