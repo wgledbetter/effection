@@ -12,6 +12,7 @@ import datetime
 from keras import backend as K
 from keras.models import Model, load_model
 from keras.layers import Input, Dense
+from keras.layers import Embedding, LSTM
 from keras.optimizers import Adam
 
 import numba as nb
