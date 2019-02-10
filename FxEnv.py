@@ -90,7 +90,7 @@ class FxEnv:
 
         self.step()
         # Need to return: observation(state), reward, done, info
-        done = (self.i == self.acct.mrkt.session_length-1)
+        done = (self.i == self.acct.mrkt.session_length-2)
         return self.state(), self.reward(), done, {}
 
 #-------------------------------------------------------------------------------

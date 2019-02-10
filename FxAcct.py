@@ -38,6 +38,7 @@ class FxAcct:
         self.positions = {}
         self.trades = []
         self.valuation = []
+        self.cashHist = []
 
 
 #===============================================================================
@@ -156,11 +157,21 @@ class FxAcct:
 
 #-------------------------------------------------------------------------------
     def realVal(self):
-        self.cash
+        return self.cash
 
 #-------------------------------------------------------------------------------
     def unrealVal(self):
-        34+88
+        val = 0
+        l = self.lev
+        for pair in self.positions:
+            pos = self.positions[pair]
+            s = pos['Size']
+            p1 = pos['Price']
+            p2 = self.mrkt.getPrice(pair)
+            v = (abs(s)*p1/l) + s*(p2-p1)
+            val += v
+
+        return val
 
 #-------------------------------------------------------------------------------
     def getDicState(self):
@@ -193,6 +204,7 @@ class FxAcct:
 #-------------------------------------------------------------------------------
     def step(self):
         self.valuation.append(self.value())
+        self.cashHist.append(self.cash)
         self.mrkt.step()
         self.i += 1
 

@@ -5,7 +5,7 @@
 import numpy as np
 
 from keras import backend as K
-from keras.models import Model, load_model, LSTM
+from keras.models import Model, load_model
 from keras.layers import Input, Dense
 from keras.optimizers import Adam
 
@@ -264,7 +264,7 @@ class Agent:
             self.env.acct.mrkt.data_folder_name = TEST_FOLDER_NAME
 
         for g in range(nGames):
-            temp_output = [[], [], [], [], []]
+            temp_output = {}
             self.reset_env()
             done = False
             while not done:
@@ -276,11 +276,11 @@ class Agent:
             trades = self.env.acct.trades
             positions = self.env.acct.positions
 
-            temp_output[0] = mkt_data
-            temp_output[1] = trades
-            temp_output[2] = self.env.acct.valuation
-            temp_output[3] = positions
-            temp_output[4] = self.reward
+            temp_output['data'] = mkt_data
+            temp_output['trades'] = trades
+            temp_output['value'] = self.env.acct.valuation
+            temp_output['positions'] = positions
+            temp_output['reward'] = self.reward
 
             output.append(temp_output)
 
