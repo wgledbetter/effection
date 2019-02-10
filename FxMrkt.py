@@ -141,3 +141,12 @@ class FxMrkt:
 
         elif self.mode == 'Live':
             1+2
+
+#-------------------------------------------------------------------------------
+    def getLastClose(self, p):
+        if self.mode == 'Local':
+            try:
+                c = self.pair[p]['close'].iloc[self.i]
+                return c
+            except:
+                return 999999999999
