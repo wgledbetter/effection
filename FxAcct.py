@@ -16,19 +16,19 @@ class FxAcct:
         self.deposit = deposit
         self.cash = deposit
         self.lev = lev
-        
+
         self.i = 0
-        
+
         if mode == 'Local':
             self.initLocal(data_folder_name)
-            
+
         elif mode == 'Practice':
             self.initPractice()
-        
+
         elif mode == 'Live':
             self.initLive()
-            
-            
+
+
 #===============================================================================
     # Initialization
     def initLocal(self, data_folder_name):
@@ -38,31 +38,31 @@ class FxAcct:
         self.positions = {}
         self.trades = []
         self.valuation = []
-        
-        
+
+
 #===============================================================================
     # Control
     ## Stuff like resetting balances
-    
-    
+
+
 #===============================================================================
     # Trading
     def buy(self, pair, size):
         if self.mode == 'Local':
             # See if there are open positions for this pair
             exist = pair in self.positions
-                
+
             if exist and (self.positions[pair]['Size'] < 0):
                 # If we had sold some of 'pair', close those before buying
                 self.close(pair)
                 exist = False
-                
+
             elif exist:
                 # A buy position is already open
                 # Do we add to the position or leave it?
                 # Let's just leave it for now.
                 return
-            
+
             if not exist:
                 self.positions[pair] = {'Size': size, 'Price': self.mrkt.getPrice(pair),
                                         'Time': self.i}
@@ -70,44 +70,44 @@ class FxAcct:
                 if self.cash < 0:
                     print('OUT OF CASH')
                 return
-        
+
         elif self.mode == 'Practice':
             # aoeu
             1+1
-        
+
         elif self.mode == 'Live':
             # aoeu
             1+1
-        
+
 #-------------------------------------------------------------------------------
     def sell(self, pair, size):
         if self.mode == 'Local':
             # See if there are open positions for this pair
             exist = pair in self.positions
-                
+
             if exist and (self.positions[pair]['Size'] > 0):
                 self.close(pair)
                 exist = False
-                
+
             elif exist:
                 # A sell position is already open
                 # Leave it alone
                 return
-            
+
             if not exist:
                 self.positions[pair] = {'Size': -size, 'Price': self.mrkt.getPrice(pair),
                                         'Time': self.i}
                 self.cash -= size * self.positions[pair]['Price'] / self.lev
                 return
-        
+
         elif self.mode == 'Practice':
             # aoeu
             1+1
-        
+
         elif self.mode == 'Live':
             # aoeu
             1+1
-        
+
 #-------------------------------------------------------------------------------
     def close(self, pair):
         if self.mode == 'Local':
@@ -124,20 +124,20 @@ class FxAcct:
                 t['Pct'] = (s/abs(s)) * (self.lev/t['Open']) * (t['Close'] - t['Open']) * 100
                 t['Start'] = self.positions[pair]['Time']
                 t['Stop'] = self.i
-                
+
                 del self.positions[pair]
                 self.cash += abs(s)*t['Open']/self.lev + t['PL']
                 self.trades.append(t)
-        
+
         elif self.mode == 'Practice':
             # aoeu
             1+1
-        
+
         elif self.mode == 'Live':
             # aoeu
             1+1
-            
-            
+
+
 #===============================================================================
     # External Interface Functions
     def value(self):
@@ -151,17 +151,17 @@ class FxAcct:
             p2 = self.mrkt.getPrice(pair)
             v = (abs(s)*p1/l) + s*(p2-p1)
             val += v
-            
+
         return val
-        
+
 #-------------------------------------------------------------------------------
     def realVal(self):
         1+4
-        
+
 #-------------------------------------------------------------------------------
     def unrealVal(self):
         34+88
-        
+
 #-------------------------------------------------------------------------------
     def getDicState(self):
         d = {}
@@ -169,7 +169,7 @@ class FxAcct:
         d['Value'] = self.value
         d['Positions'] = self.positions
         return d
-        
+
 #-------------------------------------------------------------------------------
     def getVecState(self):
         # Format:
@@ -189,13 +189,13 @@ class FxAcct:
             v = np.append(v, bhs)
             v = np.append(v, p)
         return v
-        
+
 #-------------------------------------------------------------------------------
     def step(self):
         self.valuation.append(self.value())
         self.mrkt.step()
         self.i += 1
-        
+
 #-------------------------------------------------------------------------------
     def reset(self):
         self.positions = {}

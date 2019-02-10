@@ -5,7 +5,7 @@
 import numpy as np
 
 from keras import backend as K
-from keras.models import Model, load_model
+from keras.models import Model, load_model, LSTM
 from keras.layers import Input, Dense
 from keras.optimizers import Adam
 
@@ -247,7 +247,7 @@ class Agent:
                                           [action])
             for _ in range(EPOCHS):
                 self.critic.train_on_batch([obs], [reward])
-                
+
     #___________________________________________________________________________
     def test(self, nGames=1):
         # Run the actor on environment and see results
