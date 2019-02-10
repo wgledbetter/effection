@@ -131,3 +131,5 @@ It's strange that the agent consistently loses 24 pct.
 Some kind of data normalization might be useful so that it's not directly recieving the price of a pair, but the change of that pair.
 
 Interesting artifact with reward function: It's 4 OoM higher on the last step... Well, that's why I'm updating it.
+
+1808: I think all that's needed for the LSTM to work is to put in an Embedding layer right before it. What I'm not sure about is the input parameters for an Embedding.
