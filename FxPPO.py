@@ -341,46 +341,59 @@ class Agent:
             for p in PAIRS:
                 pairData = gameData['data'][p]
                 dates = pairData['gmt']
-                candleTrace = go.Candlestick(x=dates,
-                                             open=pairData['open'],
-                                             high=pairData['high'],
-                                             low=pairData['low'],
-                                             close=pairData['close'])
+                candleTrace = go.Ohlc(x=dates,
+                                      open=pairData['open'],
+                                      high=pairData['high'],
+                                      low=pairData['low'],
+                                      close=pairData['close'])
 
-                pairTrades = []
+                profTrades = []
+                lossTrades = []
                 for t in gameData['trades']:
                     if t['Pair'] == p:
-                        pairTrades.append(t)
+                        if t['PL'] > 0:
+                            profTrades.append(t)
+                        else:
+                            lossTrades.append(t)
 
                 # Now plot the trades on top of the candles
-                xt = []
-                yt = []
-                tColor = []
-                for t in pairTrades:
+                xPt = []
+                yPt = []
+                profCol = '#00FF00'
+                for t in profTrades:
                     tStart = dates.iloc[t['Start']+1]
                     tStop = dates.iloc[t['Stop']+1]
-                    xt += [tStart, tStop, None]
+                    xPt += [tStart, tStop, None]
                     pStart = t['Open']
                     pStop = t['Close']
-                    yt += [pStart, pStop, None]
-                    if t['Size']*(pStop-pStart) > 0:
-                        # Profitable Trade
-                        col = '#00FF00'
-                        tColor += [col, col, col]
-                    else:
-                        # Unprofitable Trade
-                        col = '#FF0000'
-                        tColor += [col, col, col]
-
-                if pairTrades == []:
-                    tradeTrace = []
+                    yPt += [pStart, pStop, None]
+                    
+                if profTrades == []:
+                    profTradeTrace = []
                 else:
-                    tradeTrace = go.Scatter(x=xt, y=yt, mode='lines+markers')
-                                            # line=dict(color=tColor))
+                    profTradeTrace = go.Scatter(x=xPt, y=yPt, mode='lines+markers',
+                                            line=dict(color=profCol))
+
+                xLt = []
+                yLt = []
+                lossCol = '#FF0000'
+                for t in lossTrades:
+                    tStart = dates.iloc[t['Start']+1]
+                    tStop = dates.iloc[t['Stop']+1]
+                    xLt += [tStart, tStop, None]
+                    pStart = t['Open']
+                    pStop = t['Close']
+                    yLt += [pStart, pStop, None]
+                    
+                if lossTrades == []:
+                    lossTradeTrace = []
+                else:
+                    lossTradeTrace = go.Scatter(x=xLt, y=yLt, mode='lines+markers',
+                                            line=dict(color=lossCol))
 
                 # Valuation and reward in subplots? Later...
 
-                plotData = [candleTrace, tradeTrace]
+                plotData = [candleTrace, profTradeTrace, lossTradeTrace]
                 fig = go.Figure(data=plotData)
                 py.plot(fig,
                         filename='./plots/testGame_{}--{}--{}-{}-{}--{}:{}'
