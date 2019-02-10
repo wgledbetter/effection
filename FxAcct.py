@@ -38,7 +38,7 @@ class FxAcct:
         self.positions = {}
         self.trades = []
         self.valuation = [self.deposit]
-        self.cashHist = [self.deposit]
+        self.realHist = [self.deposit]
         self.unrealHist = [0]
 
 
@@ -204,7 +204,7 @@ class FxAcct:
 
 #-------------------------------------------------------------------------------
     def step(self):
-        self.cashHist.append(self.cash)
+        self.realHist.append(self.cash)
         self.mrkt.step()
         self.valuation.append(self.value())
         self.unrealHist.append(self.unrealVal())
@@ -216,7 +216,7 @@ class FxAcct:
         self.trades = []
         self.valuation = [self.deposit]
         self.cash = self.deposit
-        self.cashHist = [self.deposit]
+        self.realHist = [self.deposit]
         self.unrealHist = [0]
         self.i = 0
         self.mrkt.nextSession()

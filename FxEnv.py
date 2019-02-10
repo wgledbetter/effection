@@ -71,8 +71,8 @@ class FxEnv:
             return 100*(val_i - val_im1)/val_im1
         elif mode == 2:
             W = 2  # Weight of real vs unreal
-            real_im1 = self.acct.cashHist[-2]
-            real_i = self.acct.cash
+            real_im1 = self.acct.realHist[-2]
+            real_i = self.acct.realVal()
             unreal_im1 = self.acct.unrealHist[-2]
             unreal_i = self.acct.unrealVal()
             # Weight real value 2x
