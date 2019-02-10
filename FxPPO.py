@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import plotly.offline as py
 import plotly.graph_objs as go
+# from plotly import tools as py_tools # For subplotting
+import datetime
 
 from keras import backend as K
 from keras.models import Model, load_model
@@ -326,4 +328,61 @@ class Agent:
 
     #___________________________________________________________________________
     def plot_test(self, testOut):
-        2-1
+        # Notes:
+            # Trade entry and exit overlay on candle data
+
+        time = datetime.datetime.now()
+        nGames = len(testOut)
+        testDF = pd.DataFrame(testOut)
+
+        for g in range(nGames):
+            plotData = []
+            gameData = testDF.iloc[g]
+            for p in PAIRS:
+                pairData = gameData['data'][p]
+                dates = pairData['gmt']
+                candleTrace = go.Candlestick(x=dates,
+                                             open=pairData['open'],
+                                             high=pairData['high'],
+                                             low=pairData['low'],
+                                             close=pairData['close'])
+
+                pairTrades = []
+                for t in gameData['trades']:
+                    if t['Pair'] == p:
+                        pairTrades.append(t)
+
+                # Now plot the trades on top of the candles
+                xt = []
+                yt = []
+                tColor = []
+                for t in pairTrades:
+                    tStart = dates.iloc[t['Start']+1]
+                    tStop = dates.iloc[t['Stop']+1]
+                    xt += [tStart, tStop, None]
+                    pStart = t['Open']
+                    pStop = t['Close']
+                    yt += [pStart, pStop, None]
+                    if t['Size']*(pStop-pStart) > 0:
+                        # Profitable Trade
+                        col = '#00FF00'
+                        tColor += [col, col, col]
+                    else:
+                        # Unprofitable Trade
+                        col = '#FF0000'
+                        tColor += [col, col, col]
+
+                if pairTrades == []:
+                    tradeTrace = []
+                else:
+                    tradeTrace = go.Scatter(x=xt, y=yt, mode='lines+markers')
+                                            # line=dict(color=tColor))
+
+                # Valuation and reward in subplots? Later...
+
+                plotData = [candleTrace, tradeTrace]
+                fig = go.Figure(data=plotData)
+                py.plot(fig,
+                        filename='./plots/testGame_{}--{}--{}-{}-{}--{}:{}'
+                        .format(g, p, time.year, time.month, time.day,
+                                time.hour, time.minute))
