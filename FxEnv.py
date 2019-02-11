@@ -1,17 +1,15 @@
 import numpy as np
-import pandas as pd
 
 from FxAcct import FxAcct
-from FxMrkt import FxMrkt
 
 
 class FxEnv:
     def __init__(self, mode='Local', pairs=['EUR_USD', 'USD_JPY', 'GBP_USD',
                                             'AUD_USD', 'USD_CHF', 'USD_CAD',
                                             'EUR_JPY', 'EUR_GBP'],
-                       freq='M5', deposit=1000, lev=1,
-                       data_folder_name='histdata_v3', market_state_hist=4,
-                       lot_size=100):
+                 freq='M5', deposit=1000, lev=1,
+                 data_folder_name='histdata_v3', market_state_hist=4,
+                 lot_size=100):
 
         self.mode = mode
         self.pairs = pairs
@@ -33,7 +31,7 @@ class FxEnv:
             self.initLive()
 
 
-#===============================================================================
+# ==============================================================================
     # Initialization
     def initLocal(self, deposit, lev, data_folder_name):
         self.acct = FxAcct(mode=self.mode, pairs=self.pairs, freq=self.freq,
@@ -41,13 +39,13 @@ class FxEnv:
         self.mktHist = []
 
 
-#===============================================================================
+# ==============================================================================
     # Primary Interface
     def state(self):
         d = self.acct.mrkt.session_length/5
         h = d/24
         t1 = int(self.i/d)
-        t2 = int( (self.i-t1*d)/h )
+        t2 = int((self.i-t1*d)/h)
         t3 = (self.i - t1*d - t2*h)/h
         time = np.array([t1, t2, t3])
         acctState = self.acct.getVecState()
@@ -60,10 +58,11 @@ class FxEnv:
                 # For the first few states, we won't have a full history
                 hms = np.zeros(5*self.nPairs)
             histMktState = np.append(histMktState, hms)
-        st = np.append(time, np.append(acctState, np.append(mrktState, histMktState)))
+        st = np.append(time, np.append(acctState, np.append(mrktState,
+                                                            histMktState)))
         return st
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def reward(self, mode=2):
         if mode == 1:
             val_im1 = self.acct.valuation[-2]
@@ -80,7 +79,7 @@ class FxEnv:
             u_P_Wr_im1 = W*real_im1 + unreal_im1
             return 100*(u_P_Wr_i - u_P_Wr_im1)/u_P_Wr_im1
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def act(self, action):
         # Parse and Execute the buy/sell/hold actions
         # action is a 3*nPairs vector.
@@ -98,30 +97,29 @@ class FxEnv:
                 # Sell
                 self.acct.sell(pair, self.lot_size)
 
-
         self.step()
         # Need to return: observation(state), reward, done, info
         done = (self.i == self.acct.mrkt.session_length-2)
         return self.state(), self.reward(), done, {}
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def step(self):
         if self.mode == 'Local':
             self.mktHist.append(self.acct.mrkt.getVecState())
         self.acct.step()
         self.i += 1
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def reset(self):
         self.acct.reset()
         self.i = 0
         return self.state()
 
 
-#===============================================================================
+# ==============================================================================
     # Get info about the environment
     def stateSize(self):
-        # time size + account state size + market state size + market history size
+        # time size + account state size + market state size + market hist size
         # Time = 3
         # Account = 2 per pair
         # Market State = 5 per pair
@@ -129,7 +127,7 @@ class FxEnv:
         size = 3 + (2*self.nPairs) + (self.market_state_hist)*(5*self.nPairs)
         return size
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def actionSize(self):
         # 3 per pair
         size = 3*self.nPairs

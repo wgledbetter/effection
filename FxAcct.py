@@ -124,7 +124,8 @@ class FxAcct:
                 t['Open'] = self.positions[pair]['Price']
                 t['Close'] = self.mrkt.getPrice(pair)
                 t['PL'] = s * (t['Close'] - t['Open'])
-                t['Pct'] = (s/abs(s)) * (self.lev/t['Open']) * (t['Close'] - t['Open']) * 100
+                t['Pct'] = (s/abs(s)) * (self.lev/t['Open']
+                                         ) * (t['Close'] - t['Open']) * 100
                 t['Start'] = self.positions[pair]['Time']
                 t['Stop'] = self.i
 
