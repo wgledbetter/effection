@@ -8,7 +8,7 @@ class FxMrkt:
     def __init__(self, mode='Local', pairs=['EUR_USD', 'USD_JPY', 'GBP_USD',
                                             'AUD_USD', 'USD_CHF', 'USD_CAD',
                                             'EUR_JPY', 'EUR_GBP'],
-                       freq='M5', data_folder_name='histdata_v3'):
+                 freq='M5', data_folder_name='histdata_v3'):
 
         self.mode = mode
         self.pairs = pairs  # Names of pairs to use
@@ -23,7 +23,7 @@ class FxMrkt:
             self.initLive()
 
 
-#===============================================================================
+# ==============================================================================
     # Initialization
     def initLocal(self, data_folder_name):
         # Uses historical data from local files
@@ -32,19 +32,19 @@ class FxMrkt:
         self.pair = {}  # Dictionary that stores actual market data
         self.data_folder_name = data_folder_name
         self.loadGame()
-        self.session_length = len( self.pair[self.pairs[0]]['gmt'] )
+        self.session_length = len(self.pair[self.pairs[0]]['gmt'])
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def initPractice(self):
         # Uses oanda practice account
         1+2
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def initLive(self):
         # Uses oanda live account
         1+2
 
-#===============================================================================
+# ==============================================================================
     # External Interface Functions
     def nextSession(self):
         self.i = 0
@@ -59,7 +59,7 @@ class FxMrkt:
             # Wait a weekend?
             1+2
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def getDicState(self):
         # Return the current state as a dictionary.
         # Better for use when talking to Account
@@ -76,7 +76,7 @@ class FxMrkt:
 
         return ret
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def getVecState(self):
         # Return the current state as a np array.
         # Better for use when talking to Agent
@@ -94,7 +94,7 @@ class FxMrkt:
 
         return ret
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def step(self):
         self.i += 1
         if self.mode == 'Local':
@@ -108,10 +108,11 @@ class FxMrkt:
         elif self.mode == 'Live':
             1+1
 
-#===============================================================================
+# ==============================================================================
     # Local Functions
     def loadGame(self):
-        game_dir = random.choice( os.listdir('./{}/'.format(self.data_folder_name)))
+        game_dir = random.choice(os.listdir('./{}/'
+                                 .format(self.data_folder_name)))
         game_path = './{}/{}/'.format(self.data_folder_name, game_dir)
         for f in os.listdir(game_path):
             try:
@@ -121,17 +122,17 @@ class FxMrkt:
             except:
                 # Probably means its a shorter filename
                 1+2
-        self.session_length = len( self.pair[self.pairs[0]]['gmt'] )
+        self.session_length = len(self.pair[self.pairs[0]]['gmt'])
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def getPrice(self, p):
         if self.mode == 'Local':
             # Some sort of distribution between high and low of next state
             # For now lets make it uniform.
             try:
-                l = self.pair[p]['low'].iloc[self.i+1]
-                h = self.pair[p]['high'].iloc[self.i+1]
-                return np.random.uniform(l,h)
+                lo = self.pair[p]['low'].iloc[self.i+1]
+                hi = self.pair[p]['high'].iloc[self.i+1]
+                return np.random.uniform(lo, hi)
             except:
                 print('END OF GAME')
                 return 0
@@ -142,7 +143,7 @@ class FxMrkt:
         elif self.mode == 'Live':
             1+2
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def getLastClose(self, p):
         if self.mode == 'Local':
             try:
