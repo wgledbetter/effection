@@ -49,7 +49,7 @@ BATCH_SIZE = 256
 LR = 1e-4
 
 FX_ACTIVATION = K.softmax
-ACTOR_ACTIV = 'relu'
+ACTOR_ACTIV = 'tanh'
 
 NUM_LAYERS = 2
 #WHERE_LSTM = 0
