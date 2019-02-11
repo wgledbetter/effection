@@ -1,6 +1,6 @@
-## wgledbetter's modifications of ppo examples for the forex application.
+# wgledbetter's modifications of ppo examples for the forex application.
 
-#===============================================================================
+# ==============================================================================
 ## Imports
 import numpy as np
 import pandas as pd
@@ -19,7 +19,7 @@ import numba as nb
 from FxEnv import FxEnv
 
 
-#===============================================================================
+# ==============================================================================
 ## Global Variables
 # Define
 PAIRS = []
@@ -56,17 +56,18 @@ NUM_LAYERS = 2
 HIDDEN_SIZE = 200
 HIDDEN_ACTIV = 'relu'
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Calculate
 NPAIRS = len(PAIRS)
 NUM_ACTIONS = 3*NPAIRS
 
 
-#===============================================================================
+# ==============================================================================
 ## Global Functions
 def fx_activation(activation=FX_ACTIVATION):
     # The point of this was to try and apply softmax to groups of 3, but that's
-        # throwing errors, so I'll just bypass this completely with tanh or something
+        # throwing errors, so I'll just bypass this completely with tanh or
+        # something
     def fx_activation_function(x):
         outList = []
         for i in range(NPAIRS):
@@ -78,7 +79,8 @@ def fx_activation(activation=FX_ACTIVATION):
 
     return fx_activation_function
 
-#_______________________________________________________________________________
+
+# ______________________________________________________________________________
 @nb.jit
 def fx_prob2act(prob):
     act = np.array([])
@@ -86,18 +88,20 @@ def fx_prob2act(prob):
         cmd = np.argmax(prob[3*i:3*(i+1)])
         vec = np.zeros(3)
         vec[cmd] = 1
-        act = np.append(act,vec)
+        act = np.append(act, vec)
 
     return act
 
-#_______________________________________________________________________________
+
+# ______________________________________________________________________________
 @nb.jit
 def exponential_average(old, new, b1):
     return old * b1 + (1-b1) * new
 
 
-#_______________________________________________________________________________
-def proximal_policy_optimization_loss(actual_value, predicted_value, old_prediction):
+# ______________________________________________________________________________
+def proximal_policy_optimization_loss(actual_value, predicted_value,
+                                      old_prediction):
     advantage = actual_value - predicted_value
 
     def loss(y_true, y_pred):
@@ -105,11 +109,17 @@ def proximal_policy_optimization_loss(actual_value, predicted_value, old_predict
         old_prob = K.sum(y_true * old_prediction)
         r = prob/(old_prob + 1e-10)
 
-        return -K.log(prob + 1e-10) * K.mean(K.minimum(r * advantage, K.clip(r, min_value=0.8, max_value=1.2) * advantage))
+        return -K.log(prob + 1e-10) * K.mean(K.minimum(r * advantage,
+                                                       K.clip(r,
+                                                              min_value=0.8,
+                                                              max_value=1.2
+                                                              ) * advantage
+                                                       )
+                                             )
     return loss
 
 
-#===============================================================================
+# ==============================================================================
 ## Agent class definition
 class Agent:
 
@@ -134,7 +144,7 @@ class Agent:
         self.dummy_action = np.zeros((1, self.action_size))
         self.dummy_value = np.zeros((1, 1))
 
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Initialization of Networks
     def build_actor(self):
         state_input = Input(shape=(self.state_size,))
@@ -146,9 +156,11 @@ class Agent:
         for l in range(NUM_LAYERS-1):
             x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(x)
 
-        out_actions = Dense(self.action_size, activation=ACTOR_ACTIV, name='output')(x)
+        out_actions = Dense(self.action_size, activation=ACTOR_ACTIV,
+                            name='output')(x)
 
-        model = Model(inputs=[state_input, actual_value, predicted_value, old_prediction],
+        model = Model(inputs=[state_input, actual_value,
+                              predicted_value, old_prediction],
                       outputs=[out_actions])
         model.compile(optimizer=Adam(lr=LR),
                       loss=[proximal_policy_optimization_loss(
@@ -159,7 +171,7 @@ class Agent:
 
         return model
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def build_critic(self):
         state_input = Input(shape=(self.state_size,))
 
@@ -174,8 +186,7 @@ class Agent:
 
         return model
 
-
-    #---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Functions for Training
     @nb.jit
     def reset_env(self):
@@ -183,14 +194,15 @@ class Agent:
         self.observation = self.env.reset()
         self.reward = []
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def get_action(self):
         p = self.actor.predict([self.observation.reshape(1, self.state_size),
-                                self.dummy_value, self.dummy_value, self.dummy_action])
+                                self.dummy_value, self.dummy_value,
+                                self.dummy_action])
         action_matrix = fx_prob2act(p[0])
         return action_matrix, p
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def transform_reward(self):
         self.reward_over_time.append(np.array(self.reward).sum())
         for j in range(len(self.reward)):
@@ -199,7 +211,7 @@ class Agent:
                 reward += self.reward[k] * GAMMA**k  # Discounted Reward Func
             self.reward[j] = reward
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def get_batch(self, batch_size=BATCH_SIZE):
         batch = [[], [], [], []]
         tmp_batch = [[], [], []]
@@ -231,10 +243,10 @@ class Agent:
         action_mat = np.array(batch[1])
         pred = np.array(batch[2])
         pred = np.reshape(pred, (pred.shape[0], pred.shape[2]))
-        reward = np.reshape(np.array(batch[3]), (len(batch[3]),1))
+        reward = np.reshape(np.array(batch[3]), (len(batch[3]), 1))
         return obs, action_mat, pred, reward
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def train(self, episodes=EPISODES, batch_size=BATCH_SIZE):
         self.episode = 0
         if MODE == 'Local':
@@ -253,7 +265,7 @@ class Agent:
             for _ in range(EPOCHS):
                 self.critic.train_on_batch([obs], [reward])
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def test(self, nGames=1, test_folder_name=TEST_FOLDER_NAME):
         # Run the actor on environment and see results
         # Desired outputs for analysis:
@@ -292,21 +304,21 @@ class Agent:
 
         return output
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def load_actor(self, fname):
         # Load a previous actor model
         # Be careful that the environment sizing is the same.
         # ACTUALLY: Doesn't seem to work because of custom loss function
         self.actor = load_model(fname)
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def load_critic(self, fname):
         # Load a previous critic model
         # Be careful that the environment sizing is the same.
         # ACTUALLY: Doesn't seem to work because of custom loss function
         self.critic = load_model(fname)
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def test_start(self, test_folder_name=TEST_FOLDER_NAME):
         # Begins new game
         if MODE == 'Local':
@@ -315,7 +327,7 @@ class Agent:
         self.reset_env()
         self.test_done = False
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def test_step(self, nSteps=1):
         if not self.test_done:
             for s in range(nSteps):
@@ -326,7 +338,7 @@ class Agent:
 
         return actmat, predact
 
-    #___________________________________________________________________________
+    # __________________________________________________________________________
     def plot_test(self, testOut):
         # Notes:
             # Trade entry and exit overlay on candle data
@@ -366,12 +378,14 @@ class Agent:
                     pStart = t['Open']
                     pStop = t['Close']
                     yPt += [pStart, pStop, None]
-                    
+
                 if profTrades == []:
                     profTradeTrace = []
                 else:
-                    profTradeTrace = go.Scatter(x=xPt, y=yPt, mode='lines+markers',
-                                                line=dict(color=profCol))
+                    profTradeTrace = go.Scatter(x=xPt, y=yPt,
+                                                mode='lines+markers',
+                                                line=dict(color=profCol)
+                                                )
 
                 xLt = []
                 yLt = []
@@ -383,11 +397,12 @@ class Agent:
                     pStart = t['Open']
                     pStop = t['Close']
                     yLt += [pStart, pStop, None]
-                    
+
                 if lossTrades == []:
                     lossTradeTrace = []
                 else:
-                    lossTradeTrace = go.Scatter(x=xLt, y=yLt, mode='lines+markers',
+                    lossTradeTrace = go.Scatter(x=xLt, y=yLt,
+                                                mode='lines+markers',
                                                 line=dict(color=lossCol))
 
                 # Valuation and reward in subplots? Later...
