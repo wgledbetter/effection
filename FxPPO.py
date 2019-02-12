@@ -12,6 +12,7 @@ import datetime
 from keras import backend as K
 from keras.models import Model, load_model
 from keras.layers import Input, Dense
+from keras.layers import Embedding, LSTM
 from keras.optimizers import Adam
 
 import numba as nb
@@ -52,9 +53,19 @@ FX_ACTIVATION = K.softmax
 ACTOR_ACTIV = 'tanh'
 
 NUM_LAYERS = 2
-#WHERE_LSTM = 0
-HIDDEN_SIZE = 200
+DO_LSTM = True
+HIDDEN_SIZE = 128
 HIDDEN_ACTIV = 'relu'
+
+EMBEDDING_MAX = {'EUR_USD': 1.7,
+                 'USD_JPY': 135,
+                 'GBP_USD': 2.2,
+                 'AUD_USD': 1.2,
+                 'USD_CHF': 1.7,
+                 'USD_CAD': 1.7,
+                 'EUR_JPY': 180,
+                 'EUR_GBP': 1.1
+                 }
 
 # ------------------------------------------------------------------------------
 # Calculate
@@ -127,7 +138,7 @@ class Agent:
         self.env = FxEnv(mode=MODE, pairs=PAIRS, freq=FREQ, deposit=DEPOSIT,
                          data_folder_name=DATA_FOLDER_NAME, lev=LEV,
                          market_state_hist=MARKET_STATE_HISTORY,
-                         lot_size=LOT_SIZE
+                         lot_size=LOT_SIZE, lstm=DO_LSTM
                          )
         self.state_size = self.env.stateSize()
         self.action_size = self.env.actionSize()
@@ -152,10 +163,19 @@ class Agent:
         predicted_value = Input(shape=(1,))
         old_prediction = Input(shape=(self.action_size,))
 
-        x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(state_input)
+        # First Layer
+        if DO_LSTM:
+            emb_max = int(max([EMBEDDING_MAX[p] for p in PAIRS])) + 1
+            x = Embedding(emb_max, HIDDEN_SIZE)(state_input)
+            x = LSTM(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(x)
+        else:
+            x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(state_input)
+
+        # Internal Layers
         for l in range(NUM_LAYERS-1):
             x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(x)
 
+        # Final Layer
         out_actions = Dense(self.action_size, activation=ACTOR_ACTIV,
                             name='output')(x)
 
@@ -175,10 +195,19 @@ class Agent:
     def build_critic(self):
         state_input = Input(shape=(self.state_size,))
 
-        x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(state_input)
+        # First Layer
+        if DO_LSTM:
+            emb_max = int(max([EMBEDDING_MAX[p] for p in PAIRS])) + 1
+            x = Embedding(emb_max, HIDDEN_SIZE)(state_input)
+            x = LSTM(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(x)
+        else:
+            x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(state_input)
+
+        # Internal Layers
         for l in range(NUM_LAYERS-1):
             x = Dense(HIDDEN_SIZE, activation=HIDDEN_ACTIV)(x)
 
+        # Final Layer
         out_value = Dense(1)(x)
 
         model = Model(inputs=[state_input], outputs=[out_value])

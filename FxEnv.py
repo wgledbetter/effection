@@ -9,7 +9,7 @@ class FxEnv:
                                             'EUR_JPY', 'EUR_GBP'],
                  freq='M5', deposit=1000, lev=1,
                  data_folder_name='histdata_v3', market_state_hist=4,
-                 lot_size=100):
+                 lot_size=100, lstm=False):
 
         self.mode = mode
         self.pairs = pairs
@@ -17,6 +17,9 @@ class FxEnv:
         self.freq = freq
         self.market_state_hist = market_state_hist
         self.lot_size = lot_size
+        self.lstm = lstm
+        if self.lstm:
+            self.market_state_hist = 1
 
         self.i = 0
 
@@ -37,6 +40,8 @@ class FxEnv:
         self.acct = FxAcct(mode=self.mode, pairs=self.pairs, freq=self.freq,
                            deposit=deposit, lev=lev)
         self.mktHist = []
+        if self.lstm:
+            self.stateHist_LSTM = []
 
 
 # ==============================================================================
@@ -51,16 +56,43 @@ class FxEnv:
         acctState = self.acct.getVecState()
         mrktState = self.acct.mrkt.getVecState()
         histMktState = np.array([])
+        # If self.lstm, then this for loop doesn't execute
         for i in range(self.market_state_hist-1):
             try:
                 hms = self.mktHist[-(i+1)]
             except:
                 # For the first few states, we won't have a full history
                 hms = np.zeros(5*self.nPairs)
-            histMktState = np.append(histMktState, hms)
+                histMktState = np.append(histMktState, hms)
         st = np.append(time, np.append(acctState, np.append(mrktState,
                                                             histMktState)))
+        if (self.i != 0) and (self.lstm):
+            st = np.vstack([self.stateHist_LSTM, st])
         return st
+
+# ------------------------------------------------------------------------------
+    def LSTM_1state(self):
+        d = self.acct.mrkt.session_length/5
+        h = d/24
+        t1 = int(self.i/d)
+        t2 = int((self.i-t1*d)/h)
+        t3 = (self.i - t1*d - t2*h)/h
+        time = np.array([t1, t2, t3])
+        acctState = self.acct.getVecState()
+        mrktState = self.acct.mrkt.getVecState()
+        st = np.append(time, np.append(acctState, mrktState))
+        return st
+
+# ------------------------------------------------------------------------------
+    def state_LSTM(self):
+        # Return all states from start to now
+        # Each state a row
+        if self.i == 0:
+            return self.state()
+        else:
+            LSTM_hist = np.array(self.stateHist_LSTM)
+            LSTM_state = np.vstack([LSTM_hist, self.state()])
+            return LSTM_state
 
 # ------------------------------------------------------------------------------
     def reward(self, mode=2):
@@ -103,12 +135,18 @@ class FxEnv:
         self.step()
         # Need to return: observation(state), reward, done, info
         done = (self.i == self.acct.mrkt.session_length-2)
-        return self.state(), self.reward(), done, {}
+        if self.lstm:
+            st = self.LSTM_1state()
+        else:
+            st = self.state()
+        return st, self.reward(), done, {}
 
 # ------------------------------------------------------------------------------
     def step(self):
         if self.mode == 'Local':
             self.mktHist.append(self.acct.mrkt.getVecState())
+        if self.lstm:
+            self.stateHist_LSTM.append(self.LSTM_1state())
         self.acct.step()
         self.i += 1
 
@@ -116,6 +154,8 @@ class FxEnv:
     def reset(self):
         self.acct.reset()
         self.i = 0
+        self.mktHist = []
+        self.stateHist_LSTM = []
         return self.state()
 
 
@@ -127,7 +167,8 @@ class FxEnv:
         # Account = 2 per pair
         # Market State = 5 per pair
         # Market Hist = (nMktHis-1)t*(5 per pair)
-        size = 3 + (2*self.nPairs) + (self.market_state_hist)*(5*self.nPairs)
+        size = 3 + (2*self.nPairs) + (self.market_state_hist) * (
+                                                                 5*self.nPairs)
         return size
 
 # ------------------------------------------------------------------------------
