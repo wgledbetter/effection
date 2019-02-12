@@ -78,6 +78,9 @@ class FxEnv:
             u_P_Wr_i = W*real_i + unreal_i
             u_P_Wr_im1 = W*real_im1 + unreal_im1
             return 100*(u_P_Wr_i - u_P_Wr_im1)/u_P_Wr_im1
+        elif mode == 3:
+            # Create some penalty for long trades?
+            5*8
 
 # ------------------------------------------------------------------------------
     def act(self, action):
