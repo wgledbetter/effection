@@ -42,6 +42,7 @@ DEPOSIT = 1000
 LEV = 10
 LOT_SIZE = 10
 
+EXPLORATION_NOISE = 1
 LOSS_CLIPPING = 0.2
 EPISODES = 1000
 EPOCHS = 10
@@ -54,7 +55,7 @@ ACTOR_ACTIV = 'tanh'
 
 NUM_LAYERS = 2
 DO_LSTM = True
-HIDDEN_SIZE = 128
+HIDDEN_SIZE = 64
 HIDDEN_ACTIV = 'relu'
 
 EMBEDDING_MAX = {'EUR_USD': 1.7,
@@ -130,6 +131,31 @@ def proximal_policy_optimization_loss(actual_value, predicted_value,
     return loss
 
 
+# ______________________________________________________________________________
+def proximal_policy_optimization_loss_continuous(actual_value, predicted_value,
+                                                 old_prediction):
+    advantage = actual_value - predicted_value
+
+    def loss(y_true, y_pred):
+        var = K.square(EXPLORATION_NOISE)
+        pi = 3.1415926
+        denom = K.sqrt(2 * pi * var)
+        prob_num = K.exp(-K.square(y_true - y_pred) / (2*var))
+        old_prob_num = K.exp(-K.square(y_true - old_prediction) / (2*var))
+
+        prob = prob_num/denom
+        old_prob = old_prob_num/denom
+        r = prob/(old_prob + 1e-10)
+
+        return -K.mean(K.minimum(r * advantage,
+                                 K.clip(r,
+                                        min_value=1 - LOSS_CLIPPING,
+                                        max_value=1 + LOSS_CLIPPING
+                                        ) * advantage
+                                 )
+                       )
+    return loss
+
 # ==============================================================================
 ## Agent class definition
 class Agent:
@@ -183,7 +209,7 @@ class Agent:
                               predicted_value, old_prediction],
                       outputs=[out_actions])
         model.compile(optimizer=Adam(lr=LR),
-                      loss=[proximal_policy_optimization_loss(
+                      loss=[proximal_policy_optimization_loss_continuous(
                               actual_value=actual_value,
                               old_prediction=old_prediction,
                               predicted_value=predicted_value)])
@@ -228,7 +254,13 @@ class Agent:
         p = self.actor.predict([self.observation.reshape(1, self.state_size),
                                 self.dummy_value, self.dummy_value,
                                 self.dummy_action])
-        action_matrix = fx_prob2act(p[0])
+        if self.episode % 100 == 0:
+            action = p[0] + np.random.normal(loc=0,
+                                             scale=EXPLORATION_NOISE,
+                                             size=p[0].shape)
+        else:
+            action = p[0]
+        action_matrix = fx_prob2act(action)
         return action_matrix, p
 
     # __________________________________________________________________________
