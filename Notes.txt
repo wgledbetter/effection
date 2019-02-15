@@ -138,3 +138,15 @@ Interesting artifact with reward function: It's 4 OoM higher on the last step...
 10 FEB
 Tons of good work today. See github for specifics.
 Need to add reward penalty for open trades because what just happened after 100 episodes of training is that it opens a position at the beginning and just keeps it open. Could also do something where penalty accrues for the length of time trades are open, but all of that needs to wait until later. I have to focus on school stuff for a while.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+15 FEB
+Next steps:
+    Reward function:
+        punish for not entering trade
+        punish for staying in trade too long
+        some reward for entering any trade
+        some reward for exiting any trade
+    General:
+        multipair state, single tradeable
+        multipair state, multi tradeable with discretization
