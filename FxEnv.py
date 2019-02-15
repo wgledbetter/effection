@@ -33,7 +33,6 @@ class FxEnv:
         elif mode == 'Live':
             self.initLive()
 
-
 # ==============================================================================
     # Initialization
     def initLocal(self, deposit, lev, data_folder_name):
@@ -42,7 +41,6 @@ class FxEnv:
         self.mktHist = []
         if self.lstm:
             self.stateHist_LSTM = []
-
 
 # ==============================================================================
     # Primary Interface
@@ -157,7 +155,6 @@ class FxEnv:
         self.mktHist = []
         self.stateHist_LSTM = []
         return self.state()
-
 
 # ==============================================================================
     # Get info about the environment
