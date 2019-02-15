@@ -439,8 +439,11 @@ class Agent:
                 plotData = [candleTrace, profTradeTrace, lossTradeTrace]
                 layout = go.Layout(xaxis=dict(fixedrange=False),
                                    yaxis=dict(fixedrange=False))
-                fig = go.Figure(data=plotData, layout=layout)
-                py.plot(fig,
-                        filename='./plots/{}-{}-{}--{}:{}--testGame_{}--{}'
-                        .format(time.year, time.month, time.day,
-                                time.hour, time.minute, g, p))
+                try:
+                    fig = go.Figure(data=plotData, layout=layout)
+                    py.plot(fig,
+                            filename='./plots/{}-{}-{}--{}:{}--testGame_{}--{}'
+                            .format(time.year, time.month, time.day,
+                                    time.hour, time.minute, g, p))
+                except:
+                    1+4
