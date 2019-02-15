@@ -26,12 +26,12 @@ from FxEnv import FxEnv
 PAIRS = []
 PAIRS.append('EUR_USD')
 #PAIRS.append('USD_JPY')
-PAIRS.append('GBP_USD')
+#PAIRS.append('GBP_USD')
 #PAIRS.append('AUD_USD')
 #PAIRS.append('USD_CHF')
 #PAIRS.append('USD_CAD')
 #PAIRS.append('EUR_JPY')
-PAIRS.append('EUR_GBP')
+#PAIRS.append('EUR_GBP')
 
 MODE = 'Local'
 FREQ = 'M5'
@@ -50,11 +50,11 @@ BATCH_SIZE = 256
 LR = 1e-4
 
 FX_ACTIVATION = K.softmax
-ACTOR_ACTIV = 'tanh'
+ACTOR_ACTIV = 'softmax'
 
 NUM_LAYERS = 2
 DO_LSTM = True
-HIDDEN_SIZE = 128
+HIDDEN_SIZE = 64
 HIDDEN_ACTIV = 'relu'
 
 EMBEDDING_MAX = {'EUR_USD': 1.7,
