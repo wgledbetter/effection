@@ -25,13 +25,13 @@ from FxEnv import FxEnv
 # Define
 PAIRS = []
 PAIRS.append('EUR_USD')
-#PAIRS.append('USD_JPY')
-#PAIRS.append('GBP_USD')
-#PAIRS.append('AUD_USD')
-#PAIRS.append('USD_CHF')
-#PAIRS.append('USD_CAD')
-#PAIRS.append('EUR_JPY')
-#PAIRS.append('EUR_GBP')
+PAIRS.append('USD_JPY')
+PAIRS.append('GBP_USD')
+PAIRS.append('AUD_USD')
+PAIRS.append('USD_CHF')
+PAIRS.append('USD_CAD')
+PAIRS.append('EUR_JPY')
+PAIRS.append('EUR_GBP')
 
 MODE = 'Local'
 FREQ = 'M5'
