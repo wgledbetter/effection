@@ -57,14 +57,23 @@ DO_LSTM = True
 HIDDEN_SIZE = 64
 HIDDEN_ACTIV = 'relu'
 
-EMBEDDING_MAX = {'EUR_USD': 1.7,
-                 'USD_JPY': 135,
-                 'GBP_USD': 2.2,
-                 'AUD_USD': 1.2,
-                 'USD_CHF': 1.7,
-                 'USD_CAD': 1.7,
-                 'EUR_JPY': 180,
-                 'EUR_GBP': 1.1
+# EMBEDDING_MAX = {'EUR_USD': 1.7,
+#                  'USD_JPY': 135,
+#                  'GBP_USD': 2.2,
+#                  'AUD_USD': 1.2,
+#                  'USD_CHF': 1.7,
+#                  'USD_CAD': 1.7,
+#                  'EUR_JPY': 180,
+#                  'EUR_GBP': 1.1
+#                  }
+EMBEDDING_MAX = {'EUR_USD': 5000,
+                 'USD_JPY': 5000,
+                 'GBP_USD': 5000,
+                 'AUD_USD': 5000,
+                 'USD_CHF': 5000,
+                 'USD_CAD': 5000,
+                 'EUR_JPY': 5000,
+                 'EUR_GBP': 5000
                  }
 
 # ------------------------------------------------------------------------------

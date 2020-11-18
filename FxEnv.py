@@ -61,7 +61,8 @@ class FxEnv:
             except:
                 # For the first few states, we won't have a full history
                 hms = np.zeros(5*self.nPairs)
-                histMktState = np.append(histMktState, hms)
+
+            histMktState = np.append(histMktState, hms)
         st = np.append(time, np.append(acctState, np.append(mrktState,
                                                             histMktState)))
         if (self.i != 0) and (self.lstm):
@@ -164,8 +165,7 @@ class FxEnv:
         # Account = 2 per pair
         # Market State = 5 per pair
         # Market Hist = (nMktHis-1)t*(5 per pair)
-        size = 3 + (2*self.nPairs) + (self.market_state_hist) * (
-                                                                 5*self.nPairs)
+        size = 3 + (2*self.nPairs) + (self.market_state_hist) * (5*self.nPairs)
         return size
 
 # ------------------------------------------------------------------------------
